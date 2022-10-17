@@ -2,7 +2,7 @@
 
 import numpy as np
 import numpy.testing as npt
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 import pytest
 
 def test_daily_mean_zeros():
@@ -40,8 +40,6 @@ def test_load_csv(mock_get_data_dir):
         load_csv('/test.csv')
         name, args, kwargs = mock_loadtxt.mock_calls[1]
         assert kwargs['fname'] == '/test.csv'
-
-# TODO(lesson-automatic) Implement tests for the other statistical functions
 
 def test_daily_max():
     """Test that max function works for an array of positive integers."""
@@ -104,3 +102,14 @@ def test_patient_normalise(test, expected, raises):
             npt.assert_almost_equal(np.array(expected), patient_normalise(test), decimal=2)
     else:
         npt.assert_almost_equal(np.array(expected), patient_normalise(test), decimal=2)
+
+@patch('inflammation.models.get_data_dir',return_value = '/data_dir')
+def test_csv_loading(mock_get_data_dir):
+    from inflammation.models import load_csv
+    with patch('numpy.loadtxt') as mock_loadtxt:
+        load_csv('test.csv')
+        name, args, kwargs = mock_loadtxt.mock_calls[0]
+        assert kwargs['fname'] == '/data_dir/test.csv'
+        load_csv('/test.csv')
+        name, args, kwargs = mock_loadtxt.mock_calls[1]
+        assert kwargs['fname'] == '/test.csv'
